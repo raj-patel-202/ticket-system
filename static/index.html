@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AuraPass — Live Events</title>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="/static/css/theme.css?v=2.0">
+    <link rel="stylesheet" href="/static/css/seat_map.css?v=1.8">
+    <link rel="stylesheet" href="/static/css/admin.css?v=2.0">
+
+    <!-- React & Babel via CDN -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- React Router DOM -->
+    <script crossorigin src="https://unpkg.com/@remix-run/router@1.16.1/dist/router.umd.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-router@6.23.1/dist/umd/react-router.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-router-dom@6.23.1/dist/umd/react-router-dom.production.min.js"></script>
+    
+    <!-- Global App Configuration -->
+    <script src="/static/js/app.js"></script>
+
+    <!-- Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body>
+    <div id="root"></div>
+
+    <!-- React Components & Pages -->
+    <script type="text/babel" src="/static/js/react/context/AuthContext.js"></script>
+    <script type="text/babel" src="/static/js/react/components/Navbar.js?v=1.8"></script>
+    <script type="text/babel" src="/static/js/react/pages/Home.js?v=1.6"></script>
+    <script type="text/babel" src="/static/js/react/pages/Login.js?v=1.6"></script>
+    <script type="text/babel" src="/static/js/react/pages/Register.js?v=1.6"></script>
+    <script type="text/babel" src="/static/js/react/pages/SeatSelection.js?v=1.7"></script>
+    <script type="text/babel" src="/static/js/react/pages/MyTickets.js?v=1.7"></script>
+    <script type="text/babel" src="/static/js/react/pages/Dashboard.js"></script>
+    <script type="text/babel" src="/static/js/react/pages/HostEvent.js?v=1.6"></script>
+    <script type="text/babel" src="/static/js/react/pages/Admin.js?v=1.0"></script>
+    <script type="text/babel" src="/static/js/react/App.js?v=1.1"></script>
+</body>
+</html>
