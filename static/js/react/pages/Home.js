@@ -10,6 +10,7 @@ const SHOWCASE_IDEAS = [
 
 window.Home = () => {
     const [events, setEvents] = useState([]);
+    const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState('');
     const { user } = window.useAuth();
 
@@ -20,28 +21,16 @@ window.Home = () => {
 
     // Sliding capsule measurement ref & state
     const tabsRef = useRef(null);
-    const tabsWrapperRef = useRef(null);
     const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0, opacity: 0 });
 
     const handleTabSelect = (tabKey) => {
         setFilter(tabKey);
-
-        // Smoothly scroll/slide page only if tabs are scrolled far below the sticky threshold
-        requestAnimationFrame(() => {
-            if (tabsWrapperRef.current) {
-                const navbarHeight = 60;
-                const rect = tabsWrapperRef.current.getBoundingClientRect();
-                const currentScroll = window.pageYOffset || document.documentElement.scrollTop;
-                // If tabs are below the sticky position (e.g. user is at top of page), bring into view
-                if (rect.top > navbarHeight + 30) {
-                    const targetY = currentScroll + rect.top - navbarHeight - 12;
-                    window.scrollTo({
-                        top: Math.max(0, targetY),
-                        behavior: 'smooth'
-                    });
-                }
+        if (tabsRef.current) {
+            const activeBtn = tabsRef.current.querySelector(`[data-tab="${tabKey}"]`);
+            if (activeBtn && activeBtn.scrollIntoView) {
+                activeBtn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
             }
-        });
+        }
     };
 
     // Typewriter loop with generous reading gap
@@ -127,11 +116,17 @@ window.Home = () => {
             }
         } catch (err) {
             console.error("Failed to fetch events:", err);
+        } finally {
+            setLoading(false);
         }
     };
 
+    if (loading) {
+        return <window.HomeSkeleton />;
+    }
+
     return (
-        <div className="container">
+        <div className="container fade-up">
             <header className="section-head fade-up">
                 <div className="hero-badge-container">
                     <div className="hero-badge--typewriter">
@@ -141,9 +136,9 @@ window.Home = () => {
                         </span>
                     </div>
                 </div>
-                <h1 className="section-title">Stage, Screen & Stadium</h1>
+                <h1 className="section-title">{"Stage, Screen & Stadium"}</h1>
                 <p className="section-subtitle">Real-time availability and dynamic pricing. Pick your seats and secure your pass.</p>
-                <div style={{ marginTop: '16px' }}>
+                <div style={{ marginTop: '16px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
                     <div className="group-discount-pill">
                         <span className="discount-tag-icon">🏷️</span>
                         <span><strong>Special Booking Offer:</strong> Enjoy <strong>5% OFF</strong> on every additional ticket when you book more than 2 tickets!</span>
@@ -151,7 +146,7 @@ window.Home = () => {
                 </div>
             </header>
 
-            <div className="filter-tabs-wrapper fade-up fade-up-d1" ref={tabsWrapperRef}>
+            <div className="filter-tabs-wrapper fade-up fade-up-d1">
                 <div className="filter-tabs" ref={tabsRef}>
                     {/* Smooth Sliding Capsule Background */}
                     <div

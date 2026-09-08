@@ -80,19 +80,7 @@ window.MyTickets = () => {
     };
 
     if (loading) {
-        return (
-            <div className="container fade-up" style={{ textAlign: 'center', paddingTop: '100px', paddingBottom: '100px' }}>
-                <div className="morph-icon-box" style={{ margin: '0 auto 16px', width: '44px', height: '44px' }}>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <circle cx="12" cy="12" r="10" />
-                        <polyline points="12 6 12 12 16 14" />
-                    </svg>
-                </div>
-                <div style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', fontWeight: 500 }}>
-                    Loading your passes...
-                </div>
-            </div>
-        );
+        return <window.MyTicketsSkeleton />;
     }
 
     return (

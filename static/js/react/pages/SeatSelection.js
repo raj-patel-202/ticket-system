@@ -114,6 +114,7 @@ window.SeatSelection = () => {
     const [isDragging, setIsDragging] = useState(false);
     const dragStartRef = useRef({ x: 0, y: 0, panX: 0, panY: 0 });
     const hasDraggedRef = useRef(false);
+    const touchIntentRef = useRef(null);
 
     // Fetch active event details when ID changes
     useEffect(() => {
@@ -375,7 +376,7 @@ window.SeatSelection = () => {
         if (e.target && e.target.closest && (e.target.closest('.stadium-seat-3d') || e.target.closest('.theater-chair-3d'))) {
             return;
         }
-        setIsDragging(true);
+        touchIntentRef.current = null;
         hasDraggedRef.current = false;
         const touch = e.touches[0];
         dragStartRef.current = {
@@ -387,19 +388,36 @@ window.SeatSelection = () => {
     };
 
     const handleTouchMove = (e) => {
-        if (!isDragging || e.touches.length !== 1) return;
+        if (e.touches.length !== 1) return;
         const touch = e.touches[0];
         const dx = touch.clientX - dragStartRef.current.x;
         const dy = touch.clientY - dragStartRef.current.y;
-        if (Math.hypot(dx, dy) < 8) return;
-        hasDraggedRef.current = true;
-        setPan({
-            x: dragStartRef.current.panX + dx,
-            y: dragStartRef.current.panY + dy
-        });
+
+        // Determine user's gesture intent
+        if (!touchIntentRef.current) {
+            if (Math.hypot(dx, dy) < 8) return;
+            // If dragging predominantly vertically, let the page scroll naturally!
+            if (Math.abs(dy) > Math.abs(dx) * 1.2) {
+                touchIntentRef.current = 'scroll';
+                setIsDragging(false);
+                return;
+            } else {
+                touchIntentRef.current = 'pan';
+                setIsDragging(true);
+            }
+        }
+
+        if (touchIntentRef.current === 'pan') {
+            hasDraggedRef.current = true;
+            setPan({
+                x: dragStartRef.current.panX + dx,
+                y: dragStartRef.current.panY + dy
+            });
+        }
     };
 
     const handleTouchEnd = () => {
+        touchIntentRef.current = null;
         setIsDragging(false);
     };
 
@@ -472,19 +490,7 @@ window.SeatSelection = () => {
     };
 
     if (loading || !event) {
-        return (
-            <div className="container fade-up" style={{ textAlign: 'center', paddingTop: '100px', paddingBottom: '100px' }}>
-                <div className="morph-icon-box" style={{ margin: '0 auto 16px', width: '44px', height: '44px' }}>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <circle cx="12" cy="12" r="10" />
-                        <polyline points="12 6 12 12 16 14" />
-                    </svg>
-                </div>
-                <div style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', fontWeight: 500 }}>
-                    Loading interactive venue map...
-                </div>
-            </div>
-        );
+        return <window.SeatSelectionSkeleton />;
     }
 
     const qty = event.event_type === 'concert' ? concertQty : selectedSeats.length;
@@ -918,7 +924,7 @@ window.SeatSelection = () => {
                                         <line x1="2" y1="12" x2="22" y2="12" />
                                         <line x1="12" y1="2" x2="12" y2="22" />
                                     </svg>
-                                    <span>Drag to pan arena</span>
+                                    <span>Swipe up/down to scroll • Drag to pan arena</span>
                                 </div>
                             </div>
 

@@ -1,15 +1,14 @@
 import random
 from datetime import datetime, timezone
-from typing import List
 from fastapi import APIRouter, HTTPException, Depends, status
 from models.schemas import TicketPurchaseRequest, TicketPurchaseResponse
 from database.core import get_db_connection
 from utils.pricing import calculate_dynamic_price
-from utils.auth import get_current_user, require_buyer
+from utils.auth import get_current_user
 
 router = APIRouter(prefix="/api/tickets", tags=["Tickets"])
 
-def generate_ticket_code(event_type: str, seed_num: int) -> str:
+def generate_ticket_code(event_type: str) -> str:
     prefix_map = {
         "concert": "CN",
         "theater": "TH",
@@ -83,10 +82,10 @@ def purchase_tickets(
     for idx, seat_pos in enumerate(order.seat_positions):
         # Apply 5% discount on extra tickets beyond 2
         ticket_selling_price = unit_price if idx < 2 else round(unit_price * 0.95, 2)
-        code = generate_ticket_code(event["event_type"], order.event_id)
+        code = generate_ticket_code(event["event_type"])
         # Ensure uniqueness
         while cursor.execute("SELECT 1 FROM sells WHERE ticket_code = ?", (code,)).fetchone():
-            code = generate_ticket_code(event["event_type"], order.event_id)
+            code = generate_ticket_code(event["event_type"])
 
         cursor.execute("""
             INSERT INTO sells (user_id, event_id, selling_price, position_of_seat, ticket_code, purchased_at)

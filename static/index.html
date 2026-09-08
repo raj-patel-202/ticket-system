@@ -2,13 +2,17 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+    <meta name="theme-color" content="#f4f3ef">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <title>AuraPass — Live Events</title>
     
     <!-- CSS -->
-    <link rel="stylesheet" href="/static/css/theme.css?v=2.0">
-    <link rel="stylesheet" href="/static/css/seat_map.css?v=1.8">
-    <link rel="stylesheet" href="/static/css/admin.css?v=2.0">
+    <link rel="stylesheet" href="/static/css/theme.css?v=4.0">
+    <link rel="stylesheet" href="/static/css/seat_map.css?v=4.0">
+    <link rel="stylesheet" href="/static/css/admin.css?v=4.0">
 
     <!-- React & Babel via CDN -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
@@ -29,16 +33,19 @@
     <div id="root"></div>
 
     <!-- React Components & Pages -->
-    <script type="text/babel" src="/static/js/react/context/AuthContext.js"></script>
-    <script type="text/babel" src="/static/js/react/components/Navbar.js?v=1.8"></script>
-    <script type="text/babel" src="/static/js/react/pages/Home.js?v=1.6"></script>
-    <script type="text/babel" src="/static/js/react/pages/Login.js?v=1.6"></script>
-    <script type="text/babel" src="/static/js/react/pages/Register.js?v=1.6"></script>
-    <script type="text/babel" src="/static/js/react/pages/SeatSelection.js?v=1.7"></script>
-    <script type="text/babel" src="/static/js/react/pages/MyTickets.js?v=1.7"></script>
-    <script type="text/babel" src="/static/js/react/pages/Dashboard.js"></script>
-    <script type="text/babel" src="/static/js/react/pages/HostEvent.js?v=1.6"></script>
-    <script type="text/babel" src="/static/js/react/pages/Admin.js?v=1.0"></script>
-    <script type="text/babel" src="/static/js/react/App.js?v=1.1"></script>
+    <script type="text/babel" src="/static/js/react/components/Skeleton.js?v=4.0"></script>
+    <script type="text/babel" src="/static/js/react/context/AuthContext.js?v=4.0"></script>
+    <script type="text/babel" src="/static/js/react/components/BackgroundArts.js?v=4.0"></script>
+    <script type="text/babel" src="/static/js/react/components/ScrollToTop.js?v=4.0"></script>
+    <script type="text/babel" src="/static/js/react/components/Navbar.js?v=4.0"></script>
+    <script type="text/babel" src="/static/js/react/pages/Home.js?v=4.0"></script>
+    <script type="text/babel" src="/static/js/react/pages/Login.js?v=4.0"></script>
+    <script type="text/babel" src="/static/js/react/pages/Register.js?v=4.0"></script>
+    <script type="text/babel" src="/static/js/react/pages/SeatSelection.js?v=4.0"></script>
+    <script type="text/babel" src="/static/js/react/pages/MyTickets.js?v=4.0"></script>
+    <script type="text/babel" src="/static/js/react/pages/Dashboard.js?v=4.0"></script>
+    <script type="text/babel" src="/static/js/react/pages/HostEvent.js?v=4.0"></script>
+    <script type="text/babel" src="/static/js/react/pages/Admin.js?v=4.0"></script>
+    <script type="text/babel" src="/static/js/react/App.js?v=4.0"></script>
 </body>
 </html>

@@ -184,16 +184,7 @@ window.Admin = () => {
     });
 
     if (loading) {
-        return (
-            <div className="container" style={{ paddingTop: '80px', textAlign: 'center' }}>
-                <div className="glass-panel" style={{ padding: '60px 20px', maxWidth: '480px', margin: '0 auto' }}>
-                    <div className="spinner" style={{ width: '36px', height: '36px', margin: '0 auto 16px' }} />
-                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-                        Initializing AuraPass Admin Console & Server Telemetry...
-                    </p>
-                </div>
-            </div>
-        );
+        return <window.AdminSkeleton />;
     }
 
     const srv = healthData || analytics?.server || {};
@@ -558,7 +549,7 @@ window.Admin = () => {
                     </div>
 
                     {/* Users Glass Table */}
-                    <div className="glass-panel" style={{ padding: '0', overflow: 'hidden' }}>
+                    <div className="glass-panel" style={{ padding: '0', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
                         <table className="dashboard-glass-table">
                             <thead>
                                 <tr>

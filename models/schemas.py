@@ -44,9 +44,6 @@ class EventOut(BaseModel):
     status: str
     created_at: str
 
-class TicketPurchaseItem(BaseModel):
-    seat_position: str
-
 class TicketPurchaseRequest(BaseModel):
     event_id: int
     seat_positions: List[str] = Field(..., min_length=1)

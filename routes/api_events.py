@@ -1,10 +1,10 @@
 from datetime import datetime, timezone
-from typing import Optional, List
+from typing import Optional
 from fastapi import APIRouter, HTTPException, Depends, status, Query
-from models.schemas import EventCreate, EventOut
+from models.schemas import EventCreate
 from database.core import get_db_connection
 from utils.pricing import calculate_dynamic_price
-from utils.auth import require_organizer, get_current_user
+from utils.auth import require_organizer
 
 router = APIRouter(prefix="/api/events", tags=["Events"])
 

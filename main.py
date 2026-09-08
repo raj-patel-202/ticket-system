@@ -2,6 +2,7 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from database.core import init_db, seed_default_data
 from routes import api_auth, api_events, api_tickets, api_admin, api_organizer
 
@@ -9,7 +10,7 @@ BASE_DIR = Path(__file__).resolve().parent
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Initialize SQLite tables and seed demo dataset
+    # Initialize SQLite tables and default user accounts
     init_db()
     seed_default_data()
     yield
@@ -33,11 +34,13 @@ app.include_router(api_tickets.router)
 app.include_router(api_admin.router)
 app.include_router(api_organizer.router)
 
-from fastapi.responses import FileResponse
-
 @app.get("/{full_path:path}")
 async def serve_spa(full_path: str):
-    return FileResponse(static_dir / "index.html")
+    response = FileResponse(static_dir / "index.html")
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+    return response
 
 if __name__ == "__main__":
     import uvicorn

@@ -46,10 +46,30 @@ window.AuthProvider = ({ children }) => {
         setUser(null);
     };
 
-    if (loading) return <div>Loading...</div>;
+    if (loading) {
+        return (
+            <div className="skeleton-page-container" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+                <nav className="navbar">
+                    <div className="container nav-container">
+                        <div className="nav-brand">
+                            <span className="brand-dot" />
+                            <span className="brand-name">AuraPass</span>
+                        </div>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                            {window.SkeletonBlock && <window.SkeletonBlock width="80px" height="34px" borderRadius="999px" />}
+                            {window.SkeletonBlock && <window.SkeletonBlock width="95px" height="34px" borderRadius="999px" />}
+                        </div>
+                    </div>
+                </nav>
+                <main style={{ flex: 1 }}>
+                    {window.HomeSkeleton ? <window.HomeSkeleton /> : null}
+                </main>
+            </div>
+        );
+    }
 
     return (
-        <window.AuthContext.Provider value={{ user, login, logout, checkAuth }}>
+        <window.AuthContext.Provider value={{ user, login, logout, checkAuth, authLoading: loading }}>
             {children}
         </window.AuthContext.Provider>
     );

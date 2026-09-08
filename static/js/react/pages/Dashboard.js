@@ -149,22 +149,7 @@ window.Dashboard = () => {
 
     // State 1: Loading
     if (loading) {
-        return (
-            <div className="container fade-up" style={{ textAlign: 'center', paddingTop: '100px', paddingBottom: '100px' }}>
-                <div className="morph-icon-box" style={{ margin: '0 auto 18px', width: '46px', height: '46px' }}>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                        <circle cx="12" cy="12" r="10" />
-                        <polyline points="12 6 12 12 16 14" />
-                    </svg>
-                </div>
-                <div style={{ color: 'var(--text-primary)', fontSize: '1.05rem', fontWeight: 600, marginBottom: '6px' }}>
-                    Loading Organizer Dashboard
-                </div>
-                <div style={{ color: 'var(--text-secondary)', fontSize: '0.84rem' }}>
-                    Retrieving your live stages, ticket sales velocity, and venue occupancies...
-                </div>
-            </div>
-        );
+        return <window.DashboardSkeleton />;
     }
 
     // State 2: Error / No Information Available
@@ -488,7 +473,7 @@ window.Dashboard = () => {
                         </button>
                     </div>
                 ) : (
-                    <div key={categoryFilter} className="card-slide-transition" style={{ overflowX: 'auto' }}>
+                    <div key={categoryFilter} className="card-slide-transition" style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
                         <table className="dashboard-glass-table">
                             <thead>
                                 <tr>

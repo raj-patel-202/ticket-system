@@ -80,16 +80,12 @@ def seed_default_data():
     now = datetime.now(timezone.utc)
     one_week_ago = (now - timedelta(days=7)).isoformat()
     three_days_ago = (now - timedelta(days=3)).isoformat()
-    event_time_1 = (now + timedelta(days=42, hours=5)).isoformat()
-    event_time_2 = (now + timedelta(days=6, hours=2)).isoformat()
-    event_time_3 = (now + timedelta(days=21, hours=3)).isoformat()
-    event_time_4 = (now + timedelta(days=75, hours=4)).isoformat()
 
     # Default passwords
     admin_pw = hash_password("admin123")
     user_pw = hash_password("secret123")
 
-    # 1. Seed Users
+    # Seed Default User Accounts
     users_data = [
         ("admin", "admin@ticketing.local", admin_pw, "admin", one_week_ago),
         ("organizer1", "eo@soundwave.io", user_pw, "organizer", one_week_ago),
@@ -101,82 +97,6 @@ def seed_default_data():
         "INSERT INTO users (username, email, password, user_type, created_at) VALUES (?, ?, ?, ?, ?)",
         users_data
     )
-
-    # 2. Seed Events
-    events_data = [
-        (
-            2, # organizer1
-            "Neon Skyline",
-            "concert",
-            "Riverside Arena, Austin TX",
-            event_time_1,
-            800,
-            416, # 52% sold -> Milestone 1 Active
-            89.00,
-            "Wavelength World Tour · Special guest Halo Static",
-            "active",
-            one_week_ago
-        ),
-        (
-            2, # organizer1
-            "Last Light Over Kestrel Bay",
-            "theater",
-            "Kestrel Cinemas, Hall 4",
-            event_time_2,
-            210,
-            80, # 38% sold -> Standard Base Price
-            14.50,
-            "7:45 PM screening · Hall 4, Dolby Atmos",
-            "active",
-            three_days_ago
-        ),
-        (
-            3, # stadium_ops
-            "Ironclad FC vs Meridian United",
-            "sport",
-            "Union Stadium, Chicago IL",
-            event_time_3,
-            900,
-            576, # 64% sold -> Milestone 1 Active
-            62.00,
-            "League Championship · Matchday 14",
-            "active",
-            one_week_ago
-        ),
-        (
-            2, # organizer1
-            "The Gilded Hour",
-            "theater",
-            "Lyric Playhouse, New York NY",
-            event_time_4,
-            180,
-            166, # 92% sold -> Tier 2 Milestone Surge
-            145.00,
-            "A new play in two acts · Lyric Playhouse Company",
-            "active",
-            one_week_ago
-        )
-    ]
-    cursor.executemany("""
-        INSERT INTO events (
-            user_id, event_name, event_type, venue, time, capacity, sold_tickets,
-            price_per_ticket, subtitle, status, created_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    """, events_data)
-
-    # 3. Seed Initial Purchases for buyer1
-    sells_data = [
-        (4, 1, 89.00, "GA · Tier Floor", "CN-88213", three_days_ago),
-        (4, 4, 145.00, "Orchestra Row F · Seat 12", "TH-40217", three_days_ago),
-        (4, 3, 62.00, "Sec C · Row 2 · Seat 8", "SP-70951", three_days_ago),
-        (5, 1, 89.00, "GA · Tier Floor", "CN-88214", three_days_ago),
-        (5, 2, 14.50, "Hall 4 · Row D · Seat 7", "CM-51032", three_days_ago)
-    ]
-    cursor.executemany("""
-        INSERT INTO sells (
-            user_id, event_id, selling_price, position_of_seat, ticket_code, purchased_at
-        ) VALUES (?, ?, ?, ?, ?, ?)
-    """, sells_data)
 
     conn.commit()
     conn.close()

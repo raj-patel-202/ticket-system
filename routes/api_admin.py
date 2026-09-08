@@ -4,7 +4,7 @@ import time
 import shutil
 import platform
 from datetime import datetime, timezone
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException
 from database.core import get_db_connection
 from utils.auth import require_admin
 from utils.config import settings

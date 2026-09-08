@@ -3,10 +3,14 @@ const { BrowserRouter, Routes, Route, Outlet } = ReactRouterDOM;
 window.AppLayout = () => {
     return (
         <React.Fragment>
+            {/* Multi-category event background doodles & ambient orbs for every page */}
+            <window.BackgroundArts />
             <window.Navbar />
             <main>
                 <Outlet />
             </main>
+            {/* Liquid Glass Move to Top floating button */}
+            <window.ScrollToTop />
         </React.Fragment>
     );
 };
