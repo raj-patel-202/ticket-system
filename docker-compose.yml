@@ -1,0 +1,23 @@
+services:
+  ticketing-platform:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: aurapass_ticketing_app
+    image: aurapass-ticketing-platform:latest
+    ports:
+      - "8000:8000"
+    environment:
+      - PYTHONUNBUFFERED=1
+      - HOST=0.0.0.0
+      - PORT=8000
+      - ENVIRONMENT=production
+      - DB_PATH=/app/data/ticketing.db
+      - SECRET_KEY=9a4f2d78b1e56c39a04f9812e4726b18c024d98a2e15fb63a78912c4de3f8a10
+    volumes:
+      - ticketing_data:/app/data
+    restart: unless-stopped
+
+volumes:
+  ticketing_data:
+    driver: local

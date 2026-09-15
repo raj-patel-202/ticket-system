@@ -21,6 +21,7 @@ def enrich_event_with_pricing(event: dict) -> dict:
     enriched.update(pricing)
     return enriched
 
+@router.get("", include_in_schema=False)
 @router.get("/")
 def list_events(
     event_type: Optional[str] = Query(None, description="concert, theater, or sport"),
