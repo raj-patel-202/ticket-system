@@ -684,70 +684,41 @@ window.Dashboard = () => {
                 )}
             </div>
 
-            {/* Liquid Glass Modal: Post-Hosting Ticket Pricing & Promotional Offers */}
-            {selectedEventForPricing && (
+            {/* Modal: Post-Hosting Ticket Pricing & Promotional Offers */}
+            {selectedEventForPricing && ReactDOM.createPortal(
                 <div 
-                    style={{
-                        position: 'fixed',
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        bottom: 0,
-                        backgroundColor: 'rgba(15, 23, 42, 0.65)',
-                        backdropFilter: 'blur(10px)',
-                        WebkitBackdropFilter: 'blur(10px)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        zIndex: 9999,
-                        padding: '18px'
-                    }}
+                    className="pricing-modal-backdrop"
                     onClick={(e) => {
                         if (e.target === e.currentTarget && !pricingSubmitting) {
                             setSelectedEventForPricing(null);
                         }
                     }}
                 >
-                    <div 
-                        className="glass-panel fade-up"
-                        style={{
-                            maxWidth: '540px',
-                            width: '100%',
-                            padding: '30px 28px',
-                            borderRadius: '24px',
-                            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.4)',
-                            border: '1px solid rgba(255, 255, 255, 0.15)',
-                            position: 'relative'
-                        }}
-                    >
+                    <div className="pricing-modal-dialog">
                         {/* Header */}
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '18px' }}>
-                            <div>
-                                <span className="kicker" style={{ display: 'inline-block', marginBottom: '4px' }}>EVENT PRICING CONTROLLER</span>
-                                <h3 style={{ fontSize: '1.35rem', fontWeight: 800, margin: '0 0 4px', color: 'var(--text-primary)' }}>
-                                    Manage Ticket Pricing & Offers
+                        <div className="pricing-modal-header">
+                            <div style={{ paddingRight: '12px' }}>
+                                <span className="kicker" style={{ display: 'inline-block', marginBottom: '2px', fontSize: '0.68rem' }}>
+                                    ORGANIZER PRICING
+                                </span>
+                                <h3 style={{ fontSize: '1.2rem', fontWeight: 800, margin: '0 0 2px', color: '#0f172a', letterSpacing: '-0.02em' }}>
+                                    Adjust Price & Offer
                                 </h3>
-                                <p style={{ fontSize: '0.84rem', color: 'var(--text-secondary)', margin: 0 }}>
+                                <p style={{ fontSize: '0.8rem', color: '#64748b', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '340px' }}>
                                     {selectedEventForPricing.event_name} · {selectedEventForPricing.venue}
                                 </p>
                             </div>
                             <button
                                 type="button"
                                 onClick={() => !pricingSubmitting && setSelectedEventForPricing(null)}
-                                style={{
-                                    background: 'rgba(255,255,255,0.06)',
-                                    border: '1px solid rgba(255,255,255,0.12)',
-                                    borderRadius: '50%',
-                                    width: '32px',
-                                    height: '32px',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    cursor: 'pointer',
-                                    color: 'var(--text-secondary)'
-                                }}
+                                className="pricing-modal-close"
+                                aria-label="Close dialog"
+                                title="Close dialog"
                             >
-                                ✕
+                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                                </svg>
                             </button>
                         </div>
 
@@ -755,16 +726,16 @@ window.Dashboard = () => {
                         {pricingMsg && (
                             <div 
                                 style={{
-                                    padding: '10px 14px',
-                                    borderRadius: '12px',
-                                    marginBottom: '16px',
-                                    fontSize: '0.84rem',
+                                    padding: '8px 12px',
+                                    borderRadius: '10px',
+                                    marginBottom: '14px',
+                                    fontSize: '0.82rem',
                                     display: 'flex',
                                     alignItems: 'center',
                                     gap: '8px',
-                                    background: pricingMsg.type === 'success' ? 'rgba(16, 185, 129, 0.12)' : 'rgba(220, 38, 38, 0.12)',
-                                    border: `1px solid ${pricingMsg.type === 'success' ? 'rgba(16, 185, 129, 0.3)' : 'rgba(220, 38, 38, 0.3)'}`,
-                                    color: pricingMsg.type === 'success' ? '#10b981' : '#dc2626',
+                                    background: pricingMsg.type === 'success' ? '#ecfdf5' : '#fef2f2',
+                                    border: `1px solid ${pricingMsg.type === 'success' ? '#a7f3d0' : '#fecaca'}`,
+                                    color: pricingMsg.type === 'success' ? '#065f46' : '#991b1b',
                                     fontWeight: 600
                                 }}
                             >
@@ -775,12 +746,12 @@ window.Dashboard = () => {
 
                         <form onSubmit={handleSavePricing}>
                             {/* Input 1: Base Ticket Price */}
-                            <div style={{ marginBottom: '18px' }}>
-                                <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '6px' }}>
+                            <div style={{ marginBottom: '14px' }}>
+                                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#334155', marginBottom: '5px' }}>
                                     Base Ticket Price ($ USD)
                                 </label>
-                                <div style={{ position: 'relative' }}>
-                                    <span style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', fontWeight: 700, fontFamily: 'var(--font-mono)' }}>$</span>
+                                <div className="pricing-input-wrap">
+                                    <span className="pricing-input-prefix">$</span>
                                     <input
                                         type="number"
                                         step="0.01"
@@ -788,31 +759,39 @@ window.Dashboard = () => {
                                         max="10000"
                                         value={pricingForm.price_per_ticket}
                                         onChange={(e) => setPricingForm({ ...pricingForm, price_per_ticket: e.target.value })}
-                                        className="form-control"
-                                        style={{ paddingLeft: '32px', fontFamily: 'var(--font-mono)', fontSize: '1rem', fontWeight: 600 }}
+                                        className="pricing-input-field"
                                         placeholder="75.00"
                                         required
                                         disabled={pricingSubmitting}
                                     />
                                 </div>
-                                <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: '4px', display: 'block' }}>
-                                    You can increase or decrease this rate at any time after hosting.
+                                <span style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '3px', display: 'block' }}>
+                                    Organizers can reprice tickets at any time after hosting.
                                 </span>
                             </div>
 
                             {/* Input 2: Quick Promotional Offer Presets */}
-                            <div style={{ marginBottom: '18px' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                                    <label style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
+                            <div style={{ marginBottom: '14px' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                                    <label style={{ fontSize: '0.8rem', fontWeight: 700, color: '#334155', margin: 0 }}>
                                         Promotional Offer / Discount
                                     </label>
-                                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.86rem', fontWeight: 700, color: pricingForm.offer_percent > 0 ? '#dc2626' : 'var(--text-muted)' }}>
+                                    <span style={{ 
+                                        fontFamily: 'var(--font-mono)', 
+                                        fontSize: '0.76rem', 
+                                        fontWeight: 700, 
+                                        padding: '2px 8px', 
+                                        borderRadius: '6px',
+                                        background: pricingForm.offer_percent > 0 ? '#fef2f2' : '#f1f5f9',
+                                        color: pricingForm.offer_percent > 0 ? '#e11d48' : '#64748b',
+                                        border: `1px solid ${pricingForm.offer_percent > 0 ? '#fecdd3' : '#e2e8f0'}`
+                                    }}>
                                         {pricingForm.offer_percent}% OFF
                                     </span>
                                 </div>
 
                                 {/* Preset Offer Pills */}
-                                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '12px' }}>
+                                <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap', marginBottom: '10px' }}>
                                     {[0, 5, 10, 15, 20, 25, 30].map(pct => {
                                         const isSelected = Number(pricingForm.offer_percent) === pct;
                                         return (
@@ -821,18 +800,7 @@ window.Dashboard = () => {
                                                 type="button"
                                                 onClick={() => setPricingForm({ ...pricingForm, offer_percent: pct })}
                                                 disabled={pricingSubmitting}
-                                                style={{
-                                                    padding: '6px 12px',
-                                                    borderRadius: '999px',
-                                                    fontSize: '0.78rem',
-                                                    fontFamily: 'var(--font-mono)',
-                                                    fontWeight: 700,
-                                                    border: isSelected ? '1px solid #dc2626' : '1px solid rgba(255,255,255,0.12)',
-                                                    background: isSelected ? 'rgba(239, 68, 68, 0.16)' : 'rgba(255,255,255,0.04)',
-                                                    color: isSelected ? '#dc2626' : 'var(--text-secondary)',
-                                                    cursor: 'pointer',
-                                                    transition: 'all 0.15s ease'
-                                                }}
+                                                className={`pricing-preset-pill ${isSelected ? 'active' : ''}`}
                                             >
                                                 {pct === 0 ? 'No Offer (0%)' : `${pct}% OFF`}
                                             </button>
@@ -841,7 +809,7 @@ window.Dashboard = () => {
                                 </div>
 
                                 {/* Slider for granular customization */}
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                     <input
                                         type="range"
                                         min="0"
@@ -850,9 +818,9 @@ window.Dashboard = () => {
                                         value={pricingForm.offer_percent}
                                         onChange={(e) => setPricingForm({ ...pricingForm, offer_percent: Number(e.target.value) })}
                                         disabled={pricingSubmitting}
-                                        style={{ flex: 1, accentColor: '#dc2626', cursor: 'pointer' }}
+                                        style={{ flex: 1, accentColor: '#18181b', cursor: 'pointer', height: '4px' }}
                                     />
-                                    <div style={{ width: '60px' }}>
+                                    <div style={{ width: '56px' }}>
                                         <input
                                             type="number"
                                             min="0"
@@ -860,8 +828,19 @@ window.Dashboard = () => {
                                             value={pricingForm.offer_percent}
                                             onChange={(e) => setPricingForm({ ...pricingForm, offer_percent: Math.min(90, Math.max(0, Number(e.target.value) || 0)) })}
                                             disabled={pricingSubmitting}
-                                            className="form-control"
-                                            style={{ padding: '6px', textAlign: 'center', fontFamily: 'var(--font-mono)', fontSize: '0.84rem' }}
+                                            style={{ 
+                                                width: '100%',
+                                                padding: '5px 6px', 
+                                                textAlign: 'center', 
+                                                fontFamily: 'var(--font-mono)', 
+                                                fontSize: '0.82rem', 
+                                                fontWeight: 600,
+                                                background: '#f8fafc',
+                                                border: '1px solid #e2e8f0',
+                                                borderRadius: '8px',
+                                                color: '#0f172a',
+                                                outline: 'none'
+                                            }}
                                         />
                                     </div>
                                 </div>
@@ -881,39 +860,31 @@ window.Dashboard = () => {
                                 }
 
                                 return (
-                                    <div
-                                        style={{
-                                            background: 'rgba(24, 24, 27, 0.04)',
-                                            border: '1px solid rgba(255, 255, 255, 0.08)',
-                                            borderRadius: '16px',
-                                            padding: '14px 16px',
-                                            marginBottom: '20px'
-                                        }}
-                                    >
-                                        <span style={{ fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)', fontWeight: 700, display: 'block', marginBottom: '8px' }}>
-                                            Live Attendee Checkout Preview
+                                    <div className="pricing-preview-box">
+                                        <span style={{ fontSize: '0.68rem', textTransform: 'uppercase', letterSpacing: '0.06em', color: '#64748b', fontWeight: 700, display: 'block', marginBottom: '8px' }}>
+                                            Live Attendee Checkout Breakdown
                                         </span>
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '0.84rem' }}>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', fontSize: '0.82rem' }}>
                                             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                                <span style={{ color: 'var(--text-secondary)' }}>Configured Base Rate:</span>
-                                                <span className="mono" style={{ color: 'var(--text-primary)' }}>${base.toFixed(2)}</span>
+                                                <span style={{ color: '#475569' }}>Base Ticket Price:</span>
+                                                <span className="mono" style={{ color: '#0f172a', fontWeight: 600 }}>${base.toFixed(2)}</span>
                                             </div>
                                             {hike > 0 && (
-                                                <div style={{ display: 'flex', justifyContent: 'space-between', color: '#d97706' }}>
-                                                    <span>Dynamic Surge (+{hike}% demand):</span>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', color: '#b45309', fontWeight: 600 }}>
+                                                    <span>Milestone Surge (+{hike}%):</span>
                                                     <span className="mono">+${(surgePrice - base).toFixed(2)}</span>
                                                 </div>
                                             )}
                                             {offerPct > 0 && (
-                                                <div style={{ display: 'flex', justifyContent: 'space-between', color: '#dc2626', fontWeight: 600 }}>
-                                                    <span>Organizer Offer ({offerPct}% OFF):</span>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', color: '#e11d48', fontWeight: 600 }}>
+                                                    <span>Promotional Offer (-{offerPct}%):</span>
                                                     <span className="mono">-${discount.toFixed(2)}</span>
                                                 </div>
                                             )}
-                                            <div style={{ height: '1px', background: 'rgba(255,255,255,0.08)', margin: '4px 0' }}></div>
+                                            <div style={{ height: '1px', background: '#e2e8f0', margin: '4px 0' }}></div>
                                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-                                                <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>Final Attendee Unit Price:</span>
-                                                <span className="mono" style={{ fontSize: '1.25rem', fontWeight: 800, color: offerPct > 0 ? '#10b981' : 'var(--text-primary)' }}>
+                                                <span style={{ fontWeight: 700, color: '#0f172a', fontSize: '0.84rem' }}>Final Attendee Unit Price:</span>
+                                                <span className="mono" style={{ fontSize: '1.2rem', fontWeight: 800, color: offerPct > 0 ? '#059669' : '#0f172a' }}>
                                                     ${finalPrice.toFixed(2)}
                                                 </span>
                                             </div>
@@ -923,12 +894,13 @@ window.Dashboard = () => {
                             })()}
 
                             {/* Modal Action Buttons */}
-                            <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+                            <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', paddingTop: '2px' }}>
                                 <button
                                     type="button"
                                     onClick={() => !pricingSubmitting && setSelectedEventForPricing(null)}
                                     disabled={pricingSubmitting}
                                     className="btn btn-glass btn-sm"
+                                    style={{ padding: '7px 14px', borderRadius: '8px', fontSize: '0.8rem', background: '#f1f5f9', border: '1px solid #e2e8f0', color: '#475569' }}
                                 >
                                     Cancel
                                 </button>
@@ -936,13 +908,13 @@ window.Dashboard = () => {
                                     type="submit"
                                     disabled={pricingSubmitting}
                                     className="btn btn-primary btn-sm"
-                                    style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', minWidth: '140px', justifyContent: 'center' }}
+                                    style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', minWidth: '130px', justifyContent: 'center', padding: '7px 16px', borderRadius: '8px', fontSize: '0.8rem' }}
                                 >
                                     {pricingSubmitting ? (
                                         <span>Saving...</span>
                                     ) : (
                                         <>
-                                            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.2">
+                                            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.2">
                                                 <polyline points="20 6 9 17 4 12" />
                                             </svg>
                                             <span>Save Changes</span>
@@ -952,7 +924,8 @@ window.Dashboard = () => {
                             </div>
                         </form>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
         </div>
     );
