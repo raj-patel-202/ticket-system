@@ -351,9 +351,27 @@ window.Home = () => {
                                             </div>
                                         </div>
                                         <div className="price-block">
-                                            <span className="meta-label">Price</span>
-                                            <div className="price-wrap">
+                                            <span className="meta-label">
+                                                {ev.offer_percent > 0 ? (
+                                                    <span style={{ color: '#dc2626', fontWeight: 700 }}>
+                                                        🔥 {ev.offer_percent}% OFF
+                                                    </span>
+                                                ) : (
+                                                    'Price'
+                                                )}
+                                            </span>
+                                            <div className="price-wrap" style={{ display: 'flex', alignItems: 'baseline', gap: '6px' }}>
                                                 <span className="price">${ev.current_price.toFixed(2)}</span>
+                                                {ev.offer_percent > 0 && ev.surge_price && ev.surge_price > ev.current_price && (
+                                                    <span style={{ 
+                                                        fontSize: '0.76rem', 
+                                                        color: 'var(--text-muted)', 
+                                                        textDecoration: 'line-through',
+                                                        fontFamily: 'var(--font-mono)'
+                                                    }}>
+                                                        ${ev.surge_price.toFixed(2)}
+                                                    </span>
+                                                )}
                                             </div>
                                         </div>
                                     </div>

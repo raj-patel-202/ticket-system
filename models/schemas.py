@@ -25,7 +25,12 @@ class EventCreate(BaseModel):
     time: str # ISO or datetime string
     capacity: int = Field(50, ge=10, le=120, description="Capacity between 10 and 120 seats")
     price_per_ticket: float = Field(..., gt=0.0)
+    offer_percent: Optional[float] = Field(0.0, ge=0.0, le=90.0)
     subtitle: Optional[str] = ""
+
+class EventPricingUpdate(BaseModel):
+    price_per_ticket: Optional[float] = Field(None, gt=0.0, description="Updated base ticket rate")
+    offer_percent: Optional[float] = Field(None, ge=0.0, le=90.0, description="Promotional discount percentage (0 to 90%)")
 
 class EventOut(BaseModel):
     event_id: int
@@ -37,6 +42,8 @@ class EventOut(BaseModel):
     capacity: int
     sold_tickets: int
     price_per_ticket: float
+    offer_percent: Optional[float] = 0.0
+    surge_price: Optional[float] = None
     current_price: float
     hike_percent: float
     demand_trend: str

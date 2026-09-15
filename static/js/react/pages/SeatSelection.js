@@ -1058,6 +1058,14 @@ window.SeatSelection = () => {
                                     ${unitPrice.toFixed(2)}
                                 </span>
                             </div>
+                            {event.offer_percent > 0 && (
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', color: '#dc2626', fontSize: '0.8rem', fontWeight: 600 }}>
+                                    <span>Special Offer ({event.offer_percent}% OFF applied)</span>
+                                    <span className="mono" style={{ textDecoration: 'line-through', color: 'var(--text-muted)', fontSize: '0.78rem' }}>
+                                        ${(event.surge_price || unitPrice).toFixed(2)}
+                                    </span>
+                                </div>
+                            )}
                             {extraQty > 0 && (
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', color: '#16a34a', fontSize: '0.8rem', fontWeight: 600 }}>
                                     <span>5% off extra {extraQty} {extraQty === 1 ? 'ticket' : 'tickets'}</span>

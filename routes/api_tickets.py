@@ -65,7 +65,8 @@ def purchase_tickets(
         capacity=event["capacity"],
         sold_tickets=event["sold_tickets"],
         created_at=event["created_at"],
-        event_time=event["time"]
+        event_time=event["time"],
+        offer_percent=event["offer_percent"] if "offer_percent" in event.keys() else 0.0
     )
     unit_price = pricing["current_price"]
     # 5% discount on every extra ticket bought after 2 qty

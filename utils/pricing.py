@@ -25,13 +25,15 @@ def calculate_dynamic_price(
     sold_tickets: int,
     created_at: Any,
     event_time: Any,
+    offer_percent: float = 0.0,
     now: Any = None
 ) -> Dict[str, Any]:
     """
-    Dynamic pricing based on tickets sold and time left until the event.
+    Dynamic pricing based on tickets sold, time left until the event, and organizer promotional offers.
     - Below 50% sold: Base Price (0% hike).
     - 50% to 89% sold: Milestone 1 hike (20% - 30% depending on time urgency).
     - 90%+ sold: Milestone 2 hike (50% - 90% depending on time urgency).
+    - Organizer Offer: Applies promotional discount (e.g. 10% off) on top of dynamic surge price.
     Urgency = (time elapsed / total event duration) = (1 - time_left / total_time)
     """
     if now is None:
@@ -77,7 +79,16 @@ def calculate_dynamic_price(
         demand_trend = "steady"
 
     multiplier = 1.0 + (hike_percent / 100.0)
-    current_price = round(base_price * multiplier, 2)
+    surge_price = round(base_price * multiplier, 2)
+
+    # Apply Organizer Promotional Offer / Discount
+    valid_offer = min(max(float(offer_percent or 0.0), 0.0), 90.0)
+    if valid_offer > 0.0:
+        offer_discount = round(surge_price * (valid_offer / 100.0), 2)
+        current_price = max(round(surge_price - offer_discount, 2), 1.0)
+    else:
+        offer_discount = 0.0
+        current_price = surge_price
 
     # Human-readable time left
     if remaining_seconds <= 0:
@@ -94,6 +105,9 @@ def calculate_dynamic_price(
 
     return {
         "base_price": round(base_price, 2),
+        "surge_price": surge_price,
+        "offer_percent": round(valid_offer, 1),
+        "offer_discount": offer_discount,
         "current_price": current_price,
         "hike_percent": round(hike_percent, 1),
         "tier_name": tier_name,

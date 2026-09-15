@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends
 from database.core import get_db_connection
 from utils.auth import require_organizer
+from routes.api_events import enrich_event_with_pricing
 
 router = APIRouter(prefix="/api/organizer", tags=["Organizer"])
 
@@ -14,7 +15,7 @@ def get_organizer_dashboard(current_user: dict = Depends(require_organizer)):
             SELECT * FROM events WHERE user_id = ? ORDER BY created_at DESC
         """, (current_user["u_id"],)).fetchall()
         
-        events_list = [dict(ev) for ev in events]
+        events_list = [enrich_event_with_pricing(dict(ev)) for ev in events]
         total_events = len(events_list)
         
         total_capacity = sum(ev["capacity"] for ev in events_list)

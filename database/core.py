@@ -43,12 +43,19 @@ def init_db():
         capacity INTEGER NOT NULL,
         sold_tickets INTEGER NOT NULL DEFAULT 0,
         price_per_ticket REAL NOT NULL,
+        offer_percent REAL DEFAULT 0.0,
         subtitle TEXT DEFAULT '',
         status TEXT DEFAULT 'active' CHECK(status IN ('active', 'completed', 'cancelled')),
         created_at TEXT NOT NULL,
         FOREIGN KEY (user_id) REFERENCES users (u_id) ON DELETE CASCADE
     );
     """)
+
+    # Migration check: add offer_percent column if table already exists without it
+    cursor.execute("PRAGMA table_info(events);")
+    columns = [col[1] for col in cursor.fetchall()]
+    if "offer_percent" not in columns:
+        cursor.execute("ALTER TABLE events ADD COLUMN offer_percent REAL DEFAULT 0.0;")
 
     # Sells Table
     cursor.execute("""

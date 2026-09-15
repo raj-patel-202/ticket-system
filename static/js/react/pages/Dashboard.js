@@ -12,6 +12,75 @@ window.Dashboard = () => {
     const eventsPanelRef = useRef(null);
     const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0, opacity: 0 });
 
+    // Modal state for post-hosting ticket pricing and promotional offers
+    const [selectedEventForPricing, setSelectedEventForPricing] = useState(null);
+    const [pricingForm, setPricingForm] = useState({ price_per_ticket: '', offer_percent: 0 });
+    const [pricingSubmitting, setPricingSubmitting] = useState(false);
+    const [pricingMsg, setPricingMsg] = useState(null);
+
+    const openPricingModal = (ev) => {
+        setSelectedEventForPricing(ev);
+        setPricingForm({
+            price_per_ticket: ev.price_per_ticket != null ? ev.price_per_ticket : '',
+            offer_percent: ev.offer_percent != null ? ev.offer_percent : 0
+        });
+        setPricingMsg(null);
+    };
+
+    const handleSavePricing = async (e) => {
+        if (e) e.preventDefault();
+        if (!selectedEventForPricing) return;
+
+        const priceVal = parseFloat(pricingForm.price_per_ticket);
+        const offerVal = parseFloat(pricingForm.offer_percent) || 0;
+
+        if (isNaN(priceVal) || priceVal <= 0) {
+            setPricingMsg({ type: 'error', text: 'Please enter a valid base price greater than $0.00' });
+            return;
+        }
+        if (offerVal < 0 || offerVal > 90) {
+            setPricingMsg({ type: 'error', text: 'Promotional offer discount must be between 0% and 90%.' });
+            return;
+        }
+
+        setPricingSubmitting(true);
+        setPricingMsg(null);
+
+        try {
+            const res = await fetch(`/api/events/${selectedEventForPricing.event_id}/pricing`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    price_per_ticket: priceVal,
+                    offer_percent: offerVal
+                })
+            });
+
+            if (!res.ok) {
+                const errJson = await res.json().catch(() => ({}));
+                throw new Error(errJson.detail || 'Failed to update pricing.');
+            }
+
+            const updatedEvent = await res.json();
+            setData(prev => {
+                if (!prev) return prev;
+                return {
+                    ...prev,
+                    events: prev.events.map(ev => ev.event_id === updatedEvent.event_id ? { ...ev, ...updatedEvent } : ev)
+                };
+            });
+
+            setPricingMsg({ type: 'success', text: `Pricing updated! Attendee price is now $${updatedEvent.current_price.toFixed(2)}` });
+            setTimeout(() => {
+                setSelectedEventForPricing(null);
+            }, 1200);
+        } catch (err) {
+            setPricingMsg({ type: 'error', text: err.message || 'Network error updating pricing.' });
+        } finally {
+            setPricingSubmitting(false);
+        }
+    };
+
     // If user is not logged in, redirect to login
     if (!user) {
         return <Navigate to="/login" />;
@@ -481,8 +550,10 @@ window.Dashboard = () => {
                                     <th>Category</th>
                                     <th>Date & Showtime</th>
                                     <th>Base Rate</th>
+                                    <th>Promo Offer</th>
+                                    <th>Attendee Rate</th>
                                     <th>Capacity Fill</th>
-                                    <th style={{ textAlign: 'right' }}>Action</th>
+                                    <th style={{ textAlign: 'right' }}>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -493,6 +564,8 @@ window.Dashboard = () => {
                                         : ev.event_type === 'sport'
                                             ? 'linear-gradient(90deg, #146c43, #16a34a)'
                                             : 'linear-gradient(90deg, #7b2ff7, #9333ea)';
+                                    const hasOffer = ev.offer_percent && ev.offer_percent > 0;
+                                    const attendeePrice = ev.current_price != null ? ev.current_price : ev.price_per_ticket;
 
                                     return (
                                         <tr key={ev.event_id}>
@@ -527,6 +600,39 @@ window.Dashboard = () => {
                                                 </span>
                                             </td>
                                             <td>
+                                                {hasOffer ? (
+                                                    <span style={{ 
+                                                        display: 'inline-flex', 
+                                                        alignItems: 'center', 
+                                                        gap: '4px', 
+                                                        background: 'rgba(239, 68, 68, 0.1)', 
+                                                        color: '#dc2626', 
+                                                        border: '1px solid rgba(239, 68, 68, 0.25)', 
+                                                        borderRadius: '999px', 
+                                                        padding: '2px 8px', 
+                                                        fontSize: '0.72rem', 
+                                                        fontWeight: 700, 
+                                                        fontFamily: 'var(--font-mono)' 
+                                                    }}>
+                                                        🔥 {ev.offer_percent}% OFF
+                                                    </span>
+                                                ) : (
+                                                    <span style={{ color: 'var(--text-muted)', fontSize: '0.78rem' }}>None</span>
+                                                )}
+                                            </td>
+                                            <td>
+                                                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                                    <span className="mono" style={{ fontSize: '0.9rem', fontWeight: 700, color: hasOffer ? '#10b981' : 'var(--text-primary)' }}>
+                                                        ${attendeePrice.toFixed(2)}
+                                                    </span>
+                                                    {ev.hike_percent > 0 && (
+                                                        <span style={{ fontSize: '0.68rem', color: '#d97706', fontFamily: 'var(--font-mono)' }}>
+                                                            +{ev.hike_percent}% surge
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </td>
+                                            <td>
                                                 <div className="dash-occupancy">
                                                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.74rem' }}>
                                                         <span style={{ color: 'var(--text-secondary)' }}>{ev.sold_tickets} of {ev.capacity}</span>
@@ -546,13 +652,28 @@ window.Dashboard = () => {
                                                 </div>
                                             </td>
                                             <td style={{ textAlign: 'right' }}>
-                                                <Link 
-                                                    to={`/events/${ev.event_id}/select-seat`} 
-                                                    className="btn btn-glass btn-sm" 
-                                                    style={{ fontSize: '0.76rem', padding: '6px 14px', whiteSpace: 'nowrap' }}
-                                                >
-                                                    Seat Map →
-                                                </Link>
+                                                <div style={{ display: 'inline-flex', gap: '8px', alignItems: 'center' }}>
+                                                    <button 
+                                                        type="button"
+                                                        onClick={() => openPricingModal(ev)} 
+                                                        className="btn btn-primary btn-sm" 
+                                                        style={{ fontSize: '0.76rem', padding: '6px 12px', whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
+                                                        title="Modify ticket pricing or apply promotional offers"
+                                                    >
+                                                        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                                                            <line x1="12" y1="1" x2="12" y2="23" />
+                                                            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                                                        </svg>
+                                                        Set Price & Offer
+                                                    </button>
+                                                    <Link 
+                                                        to={`/events/${ev.event_id}/select-seat`} 
+                                                        className="btn btn-glass btn-sm" 
+                                                        style={{ fontSize: '0.76rem', padding: '6px 12px', whiteSpace: 'nowrap' }}
+                                                    >
+                                                        Seat Map →
+                                                    </Link>
+                                                </div>
                                             </td>
                                         </tr>
                                     );
@@ -562,6 +683,277 @@ window.Dashboard = () => {
                     </div>
                 )}
             </div>
+
+            {/* Liquid Glass Modal: Post-Hosting Ticket Pricing & Promotional Offers */}
+            {selectedEventForPricing && (
+                <div 
+                    style={{
+                        position: 'fixed',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        backgroundColor: 'rgba(15, 23, 42, 0.65)',
+                        backdropFilter: 'blur(10px)',
+                        WebkitBackdropFilter: 'blur(10px)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        zIndex: 9999,
+                        padding: '18px'
+                    }}
+                    onClick={(e) => {
+                        if (e.target === e.currentTarget && !pricingSubmitting) {
+                            setSelectedEventForPricing(null);
+                        }
+                    }}
+                >
+                    <div 
+                        className="glass-panel fade-up"
+                        style={{
+                            maxWidth: '540px',
+                            width: '100%',
+                            padding: '30px 28px',
+                            borderRadius: '24px',
+                            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.4)',
+                            border: '1px solid rgba(255, 255, 255, 0.15)',
+                            position: 'relative'
+                        }}
+                    >
+                        {/* Header */}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '18px' }}>
+                            <div>
+                                <span className="kicker" style={{ display: 'inline-block', marginBottom: '4px' }}>EVENT PRICING CONTROLLER</span>
+                                <h3 style={{ fontSize: '1.35rem', fontWeight: 800, margin: '0 0 4px', color: 'var(--text-primary)' }}>
+                                    Manage Ticket Pricing & Offers
+                                </h3>
+                                <p style={{ fontSize: '0.84rem', color: 'var(--text-secondary)', margin: 0 }}>
+                                    {selectedEventForPricing.event_name} · {selectedEventForPricing.venue}
+                                </p>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => !pricingSubmitting && setSelectedEventForPricing(null)}
+                                style={{
+                                    background: 'rgba(255,255,255,0.06)',
+                                    border: '1px solid rgba(255,255,255,0.12)',
+                                    borderRadius: '50%',
+                                    width: '32px',
+                                    height: '32px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    cursor: 'pointer',
+                                    color: 'var(--text-secondary)'
+                                }}
+                            >
+                                ✕
+                            </button>
+                        </div>
+
+                        {/* Status / Feedback alerts */}
+                        {pricingMsg && (
+                            <div 
+                                style={{
+                                    padding: '10px 14px',
+                                    borderRadius: '12px',
+                                    marginBottom: '16px',
+                                    fontSize: '0.84rem',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '8px',
+                                    background: pricingMsg.type === 'success' ? 'rgba(16, 185, 129, 0.12)' : 'rgba(220, 38, 38, 0.12)',
+                                    border: `1px solid ${pricingMsg.type === 'success' ? 'rgba(16, 185, 129, 0.3)' : 'rgba(220, 38, 38, 0.3)'}`,
+                                    color: pricingMsg.type === 'success' ? '#10b981' : '#dc2626',
+                                    fontWeight: 600
+                                }}
+                            >
+                                <span>{pricingMsg.type === 'success' ? '✓' : '⚠️'}</span>
+                                <span>{pricingMsg.text}</span>
+                            </div>
+                        )}
+
+                        <form onSubmit={handleSavePricing}>
+                            {/* Input 1: Base Ticket Price */}
+                            <div style={{ marginBottom: '18px' }}>
+                                <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '6px' }}>
+                                    Base Ticket Price ($ USD)
+                                </label>
+                                <div style={{ position: 'relative' }}>
+                                    <span style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', fontWeight: 700, fontFamily: 'var(--font-mono)' }}>$</span>
+                                    <input
+                                        type="number"
+                                        step="0.01"
+                                        min="1"
+                                        max="10000"
+                                        value={pricingForm.price_per_ticket}
+                                        onChange={(e) => setPricingForm({ ...pricingForm, price_per_ticket: e.target.value })}
+                                        className="form-control"
+                                        style={{ paddingLeft: '32px', fontFamily: 'var(--font-mono)', fontSize: '1rem', fontWeight: 600 }}
+                                        placeholder="75.00"
+                                        required
+                                        disabled={pricingSubmitting}
+                                    />
+                                </div>
+                                <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: '4px', display: 'block' }}>
+                                    You can increase or decrease this rate at any time after hosting.
+                                </span>
+                            </div>
+
+                            {/* Input 2: Quick Promotional Offer Presets */}
+                            <div style={{ marginBottom: '18px' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                                    <label style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
+                                        Promotional Offer / Discount
+                                    </label>
+                                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.86rem', fontWeight: 700, color: pricingForm.offer_percent > 0 ? '#dc2626' : 'var(--text-muted)' }}>
+                                        {pricingForm.offer_percent}% OFF
+                                    </span>
+                                </div>
+
+                                {/* Preset Offer Pills */}
+                                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '12px' }}>
+                                    {[0, 5, 10, 15, 20, 25, 30].map(pct => {
+                                        const isSelected = Number(pricingForm.offer_percent) === pct;
+                                        return (
+                                            <button
+                                                key={pct}
+                                                type="button"
+                                                onClick={() => setPricingForm({ ...pricingForm, offer_percent: pct })}
+                                                disabled={pricingSubmitting}
+                                                style={{
+                                                    padding: '6px 12px',
+                                                    borderRadius: '999px',
+                                                    fontSize: '0.78rem',
+                                                    fontFamily: 'var(--font-mono)',
+                                                    fontWeight: 700,
+                                                    border: isSelected ? '1px solid #dc2626' : '1px solid rgba(255,255,255,0.12)',
+                                                    background: isSelected ? 'rgba(239, 68, 68, 0.16)' : 'rgba(255,255,255,0.04)',
+                                                    color: isSelected ? '#dc2626' : 'var(--text-secondary)',
+                                                    cursor: 'pointer',
+                                                    transition: 'all 0.15s ease'
+                                                }}
+                                            >
+                                                {pct === 0 ? 'No Offer (0%)' : `${pct}% OFF`}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+
+                                {/* Slider for granular customization */}
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                    <input
+                                        type="range"
+                                        min="0"
+                                        max="75"
+                                        step="1"
+                                        value={pricingForm.offer_percent}
+                                        onChange={(e) => setPricingForm({ ...pricingForm, offer_percent: Number(e.target.value) })}
+                                        disabled={pricingSubmitting}
+                                        style={{ flex: 1, accentColor: '#dc2626', cursor: 'pointer' }}
+                                    />
+                                    <div style={{ width: '60px' }}>
+                                        <input
+                                            type="number"
+                                            min="0"
+                                            max="90"
+                                            value={pricingForm.offer_percent}
+                                            onChange={(e) => setPricingForm({ ...pricingForm, offer_percent: Math.min(90, Math.max(0, Number(e.target.value) || 0)) })}
+                                            disabled={pricingSubmitting}
+                                            className="form-control"
+                                            style={{ padding: '6px', textAlign: 'center', fontFamily: 'var(--font-mono)', fontSize: '0.84rem' }}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Live Calculation Preview Card */}
+                            {(() => {
+                                const base = parseFloat(pricingForm.price_per_ticket) || 0;
+                                const hike = selectedEventForPricing.hike_percent || 0;
+                                const surgePrice = roundPrice(base * (1 + hike / 100));
+                                const offerPct = parseFloat(pricingForm.offer_percent) || 0;
+                                const discount = roundPrice(surgePrice * (offerPct / 100));
+                                const finalPrice = Math.max(roundPrice(surgePrice - discount), 1.0);
+
+                                function roundPrice(num) {
+                                    return Math.round(num * 100) / 100;
+                                }
+
+                                return (
+                                    <div
+                                        style={{
+                                            background: 'rgba(24, 24, 27, 0.04)',
+                                            border: '1px solid rgba(255, 255, 255, 0.08)',
+                                            borderRadius: '16px',
+                                            padding: '14px 16px',
+                                            marginBottom: '20px'
+                                        }}
+                                    >
+                                        <span style={{ fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)', fontWeight: 700, display: 'block', marginBottom: '8px' }}>
+                                            Live Attendee Checkout Preview
+                                        </span>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '0.84rem' }}>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                                <span style={{ color: 'var(--text-secondary)' }}>Configured Base Rate:</span>
+                                                <span className="mono" style={{ color: 'var(--text-primary)' }}>${base.toFixed(2)}</span>
+                                            </div>
+                                            {hike > 0 && (
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', color: '#d97706' }}>
+                                                    <span>Dynamic Surge (+{hike}% demand):</span>
+                                                    <span className="mono">+${(surgePrice - base).toFixed(2)}</span>
+                                                </div>
+                                            )}
+                                            {offerPct > 0 && (
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', color: '#dc2626', fontWeight: 600 }}>
+                                                    <span>Organizer Offer ({offerPct}% OFF):</span>
+                                                    <span className="mono">-${discount.toFixed(2)}</span>
+                                                </div>
+                                            )}
+                                            <div style={{ height: '1px', background: 'rgba(255,255,255,0.08)', margin: '4px 0' }}></div>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                                                <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>Final Attendee Unit Price:</span>
+                                                <span className="mono" style={{ fontSize: '1.25rem', fontWeight: 800, color: offerPct > 0 ? '#10b981' : 'var(--text-primary)' }}>
+                                                    ${finalPrice.toFixed(2)}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                );
+                            })()}
+
+                            {/* Modal Action Buttons */}
+                            <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+                                <button
+                                    type="button"
+                                    onClick={() => !pricingSubmitting && setSelectedEventForPricing(null)}
+                                    disabled={pricingSubmitting}
+                                    className="btn btn-glass btn-sm"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={pricingSubmitting}
+                                    className="btn btn-primary btn-sm"
+                                    style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', minWidth: '140px', justifyContent: 'center' }}
+                                >
+                                    {pricingSubmitting ? (
+                                        <span>Saving...</span>
+                                    ) : (
+                                        <>
+                                            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.2">
+                                                <polyline points="20 6 9 17 4 12" />
+                                            </svg>
+                                            <span>Save Changes</span>
+                                        </>
+                                    )}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
